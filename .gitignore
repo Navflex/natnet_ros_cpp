@@ -5,3 +5,6 @@ deps/NatNetSDK/*
 whiteboard/*
 config/*
 !config/initiate.yaml
+devel/*
+.catkin_tools/*
+logs/*
