@@ -1,8 +1,10 @@
 
 #include "internal.h"
+#include "base_link_estimator.h"
 #include "ros/ros.h"
 
 Internal internal;
+BaseLinkEstimator base_link_estimator;
 
 //Function to make callback to the datahandler when recieve the new frame.
 void FrameCallback(sFrameOfMocapData *data, void* pUserData)
@@ -33,6 +35,8 @@ int main( int argc, char **argv)
     
     // You must init before using the object to get required parameters from the rosparam server
     internal.Init(n);
+
+    base_link_estimator.Init(n);
 
     if (internal.rosparam.serverType == "unicast")
         kDefaultConnectionType = ConnectionType_Unicast;
@@ -67,10 +71,8 @@ int main( int argc, char **argv)
     // Install natnet logging callback for some internal details
     internal.rosparam.log_internals ? NatNet_SetLogCallback( internal.MessageHandler ): internal.Pass();
 
-    while(ros::ok())
-    {   // set the frame callback handler
-        g_pClient->SetFrameReceivedCallback( FrameCallback, g_pClient);  // this function will receive data from the server
-    }
+    g_pClient->SetFrameReceivedCallback( FrameCallback, g_pClient);
+    ros::spin();
 
     return ErrorCode_OK;
 }

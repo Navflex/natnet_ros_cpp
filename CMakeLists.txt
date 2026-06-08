@@ -96,7 +96,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME} src/natnet_ros.cpp src/internal.cpp src/nn_filter.cpp)
+add_executable(${PROJECT_NAME} src/natnet_ros.cpp src/internal.cpp src/nn_filter.cpp src/base_link_estimator.cpp)
 
 add_executable(marker_poses_server src/marker_poses_server.cpp)
 target_link_libraries(marker_poses_server ${catkin_LIBRARIES} ${NATNET_LIBRARY_DIR})

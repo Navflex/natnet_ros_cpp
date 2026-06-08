@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "base_link_estimator.h"
 
 void Internal::Init(ros::NodeHandle &n)
 {
@@ -127,6 +128,10 @@ void Internal::Info(NatNetClient* g_pClient, ros::NodeHandle &n)
                     {
                         const MarkerData& markerPosition = pRB->MarkerPositions[markerIdx];
                         const int markerRequiredLabel = pRB->MarkerRequiredLabels[markerIdx];
+                        // Hand the body-local marker position to the base_link estimator
+                        // (it keeps only the two configured indices on the target body).
+                        base_link_estimator.SetBodyMarker(body_name, markerIdx,
+                                                          markerPosition[0], markerPosition[1], markerPosition[2]);
                         // Creating publisher for the markers of the rigid bodies
                         if(rosparam.pub_rigid_body_marker)
                             this->RigidbodyMarkerPub[std::to_string(pRB->ID)+std::to_string(markerIdx+1)] = n.advertise<geometry_msgs::PointStamped>(body_name+"/marker"+std::to_string(markerIdx)+"/pose", 50);
@@ -208,6 +213,17 @@ void Internal::DataHandler(sFrameOfMocapData* data, void* pUserData, Internal &i
             if(internal.rosparam.pub_rigid_body)
             {
                 PubRigidbodyPose(data->RigidBodies[i], internal);
+            }
+            // base_link estimation: feed the pose, and (once calibrated) publish base_link
+            if(base_link_estimator.Enabled())
+            {
+                const sRigidBodyData &rb = data->RigidBodies[i];
+                const std::string &rb_name = internal.ListRigidBodies[rb.ID];
+                base_link_estimator.AddSample(rb_name, data->fTimestamp,
+                                              rb.x, rb.y, rb.z, rb.qx, rb.qy, rb.qz, rb.qw);
+                base_link_estimator.PublishIfReady(rb_name,
+                                              rb.x, rb.y, rb.z, rb.qx, rb.qy, rb.qz, rb.qw,
+                                              internal.rosparam.globalFrame);
             }
         ROS_INFO_COND(internal.rosparam.log_frames, "Rigid Body [ID=%d  Error=%3.2f]", data->RigidBodies[i].ID, data->RigidBodies[i].MeanError);//, bTrackingValid);
         ROS_INFO_COND(internal.rosparam.log_frames, "x\ty\tz\tqx\tqy\tqz\tqw");
