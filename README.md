@@ -98,6 +98,11 @@ changes are following
 ```
 <node pkg="natnet_ros_cpp" type="natnet_ros_cpp" name="vrpn_client_node" output="screen" >   
 ```
+#### Navflex Augmentations
+
+- The feature to calculate the base link location was added, and can be activated by launchin this node with the following settings: `roslaunch natnet_ros_cpp natnet_ros.launch estimate_base_link:=true base_link_target_body:=Robot`
+- Once enough samples have been collected, the base link location can be computed by calling `rosservice call /natnet_ros/estimate_base_link`.
+- Once the base link has been calibrated, the map -> world (ground truth) transform can be calculated and published. Run `python3 calculate_world_map_offset.py`. Press enter with the vehicle stationary at 2 or more locations where both localizaion and ground truth have a lock, and once you are finished publish the static transform given. 
 
 ## Citation
 If you use this software, please consider citing it [from here](https://hal.science/hal-04150950)
