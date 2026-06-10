@@ -189,8 +189,12 @@ bool BaseLinkEstimator::compute(std::string &report)
     off_x_ = mx + tproj * ax;
     off_y_ = my + tproj * ay;
 
-    // --- heading sign from mean forward velocity ---
-    if (hx * fwd_sum_x_ + hy * fwd_sum_y_ < 0.0) { hx = -hx; hy = -hy; }
+    // Set orientation assuming marker A is on the left
+    double lx = ma_x_ - mb_x_;
+    double ly = ma_y_ - mb_y_;
+    double fwd_mx =  ly;
+    double fwd_my = -lx;
+    if (hx * fwd_mx + hy * fwd_my < 0.0) { hx = -hx; hy = -hy; }
     off_yaw_ = std::atan2(hy, hx);
 
     calibrated_ = true;
