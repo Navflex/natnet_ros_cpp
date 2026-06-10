@@ -7,10 +7,10 @@
   <arg name="log_latencies" default="false"/>
 
   <!-- CONNECTION -->
-  <arg name="serverIP" default="169.254.75.43"/>
-  <arg name="clientIP" default="169.254.75.99"/>
+  <arg name="serverIP" default="10.0.0.2"/>
+  <arg name="clientIP" default="10.0.0.1"/>
   <arg name="serverType" default="unicast"/>
-  <arg name="multicastAddress" default="169.254.75.43"/>
+  <arg name="multicastAddress" default="192.168.20.215"/>
   <arg name="serverCommandPort" default="1510"/>
   <arg name="serverDataPort" default="1511"/>
   <arg name="globalFrame" default="world"/>
