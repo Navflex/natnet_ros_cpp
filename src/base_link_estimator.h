@@ -63,11 +63,11 @@ private:
     std::vector<float> icr_w_;           // per-point weight 
     double fwd_sum_x_ = 0.0, fwd_sum_y_ = 0.0; // mean body-frame velocity (heading sign)
     bool   have_marker_a_ = false, have_marker_b_ = false;
-    double ma_x_ = 0, ma_y_ = 0, mb_x_ = 0, mb_y_ = 0;
+    double ma_x_ = 0, ma_y_ = 0, ma_z_ = 0, mb_x_ = 0, mb_y_ = 0, mb_z_ = 0;
 
     // --- result (body-frame offset body -> base_link) ---
     bool   calibrated_ = false;
-    double off_x_ = 0, off_y_ = 0, off_yaw_ = 0;
+    double off_x_ = 0, off_y_ = 0, off_z_ = 0, off_yaw_ = 0;
 
     // --- ros handles ---
     ros::ServiceServer srv_;

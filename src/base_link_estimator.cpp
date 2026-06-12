@@ -58,12 +58,12 @@ double BaseLinkEstimator::yawFromQuat(double qx, double qy, double qz, double qw
 }
 
 void BaseLinkEstimator::SetBodyMarker(const std::string &body, int marker_idx,
-                                      double mx, double my, double /*mz*/)
+                                      double mx, double my, double mz)
 {
     if (!enabled_ || body != target_body_)
         return;
-    if (marker_idx == marker_a_) { ma_x_ = mx; ma_y_ = my; have_marker_a_ = true; }
-    if (marker_idx == marker_b_) { mb_x_ = mx; mb_y_ = my; have_marker_b_ = true; }
+    if (marker_idx == marker_a_) { ma_x_ = mx; ma_y_ = my; ma_z_ = mz; have_marker_a_ = true; }
+    if (marker_idx == marker_b_) { mb_x_ = mx; mb_y_ = my; mb_z_ = mz; have_marker_b_ = true; }
 }
 
 void BaseLinkEstimator::AddSample(const std::string &body, double t,
@@ -189,6 +189,10 @@ bool BaseLinkEstimator::compute(std::string &report)
     off_x_ = mx + tproj * ax;
     off_y_ = my + tproj * ay;
 
+    // Z height of base link as average of a and b
+    off_z_ = (ma_z_ + mb_z_)/2;
+
+
     // Set orientation assuming marker A is on the left
     double lx = ma_x_ - mb_x_;
     double ly = ma_y_ - mb_y_;
@@ -204,12 +208,12 @@ bool BaseLinkEstimator::compute(std::string &report)
         "base_link calibration for '%s'\n"
         "  samples used     : %d\n"
         "  axle-fit RMS      : %.2f mm (perp. spread of ICR cloud)\n"
-        "  body->base_link   : x=%.4f m  y=%.4f m  yaw=%.3f deg\n"
+        "  body->base_link   : x=%.4f m  y=%.4f m  z=%.4f m  yaw=%.3f deg\n"
         "  marker midpoint   : (%.4f, %.4f) m  -> along-axle proj %.4f m\n"
         "  static_transform_publisher:\n"
         "    %.4f %.4f 0 0 0 %.5f /%s /%s/base_link",
         target_body_.c_str(), n, rms_perp * 1000.0,
-        off_x_, off_y_, off_yaw_ * 180.0 / M_PI,
+        off_x_, off_y_, off_z_, off_yaw_ * 180.0 / M_PI,
         Mx, My, tproj,
         off_x_, off_y_, off_yaw_, target_body_.c_str(), target_body_.c_str());
     report = buf;
@@ -240,7 +244,7 @@ void BaseLinkEstimator::PublishIfReady(const std::string &body,
     tf2::Quaternion q_body(qx, qy, qz, qw);
     tf2::Quaternion q_off; q_off.setRPY(0, 0, off_yaw_);
     tf2::Transform T_body(q_body, tf2::Vector3(px, py, pz));
-    tf2::Transform T_off(q_off, tf2::Vector3(off_x_, off_y_, 0.0));
+    tf2::Transform T_off(q_off, tf2::Vector3(off_x_, off_y_, off_z_));
     tf2::Transform T_base = T_body * T_off;
 
     // tf: <body>/base_link as child of the body frame
