@@ -67,7 +67,7 @@ void BaseLinkEstimator::SetBodyMarker(const std::string &body, int marker_idx,
 }
 
 void BaseLinkEstimator::AddSample(const std::string &body, double t,
-                                  double px, double py, double /*pz*/,
+                                  double px, double py, double pz,
                                   double qx, double qy, double qz, double qw)
 {
     if (!enabled_ || body != target_body_)
@@ -106,6 +106,9 @@ void BaseLinkEstimator::AddSample(const std::string &body, double t,
     double oy =  vx / w;
     if (std::hypot(ox, oy) > max_icr_dist_)
         return;                        // Too straight 
+
+    // TODO at least average this
+    rigid_body_z = pz;
 
     // TODO
     // Rotate the offset into the body frame using the MIDPOINT heading: the
@@ -190,7 +193,7 @@ bool BaseLinkEstimator::compute(std::string &report)
     off_y_ = my + tproj * ay;
 
     // Z height of base link as average of a and b
-    off_z_ = (ma_z_ + mb_z_)/2;
+    off_z_ = ((ma_z_ + mb_z_)/2) - rigid_body_z;
 
 
     // Set orientation assuming marker A is on the left
@@ -211,11 +214,11 @@ bool BaseLinkEstimator::compute(std::string &report)
         "  body->base_link   : x=%.4f m  y=%.4f m  z=%.4f m  yaw=%.3f deg\n"
         "  marker midpoint   : (%.4f, %.4f) m  -> along-axle proj %.4f m\n"
         "  static_transform_publisher:\n"
-        "    %.4f %.4f 0 0 0 %.5f /%s /%s/base_link",
+        "    %.4f %.4f %.4f 0 0 %.5f /%s /%s/base_link",
         target_body_.c_str(), n, rms_perp * 1000.0,
         off_x_, off_y_, off_z_, off_yaw_ * 180.0 / M_PI,
         Mx, My, tproj,
-        off_x_, off_y_, off_yaw_, target_body_.c_str(), target_body_.c_str());
+        off_x_, off_y_, off_z_, off_yaw_, target_body_.c_str(), target_body_.c_str());
     report = buf;
     ROS_INFO("\n%s", report.c_str());
     return true;
@@ -255,7 +258,7 @@ void BaseLinkEstimator::PublishIfReady(const std::string &body,
     tf.child_frame_id = body + "/base_link";
     tf.transform.translation.x = off_x_;
     tf.transform.translation.y = off_y_;
-    tf.transform.translation.z = 0.0;
+    tf.transform.translation.z = off_z_;
     tf.transform.rotation.x = q_off.x();
     tf.transform.rotation.y = q_off.y();
     tf.transform.rotation.z = q_off.z();

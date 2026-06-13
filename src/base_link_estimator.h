@@ -68,6 +68,7 @@ private:
     // --- result (body-frame offset body -> base_link) ---
     bool   calibrated_ = false;
     double off_x_ = 0, off_y_ = 0, off_z_ = 0, off_yaw_ = 0;
+    double rigid_body_z = 0;
 
     // --- ros handles ---
     ros::ServiceServer srv_;
