@@ -128,6 +128,12 @@ void BaseLinkEstimator::AddSample(const std::string &body, double t,
     fwd_sum_x_ +=  c * vx + sn * vy;
     fwd_sum_y_ += -sn * vx + c * vy;
 
+    // Once we accumulate enough samples, run the base link computation
+    if ((int) icr_x_.size() > min_samples_ && calibrated_ != true) {
+        std::string computation_report;
+        compute(computation_report);
+    }
+
     // TODO this is messy, don't use icr_x_, don't use a magic number
     if (publish_cloud_ && cloud_pub_.getNumSubscribers() > 0 && (icr_x_.size() % 10 == 0))
     {
