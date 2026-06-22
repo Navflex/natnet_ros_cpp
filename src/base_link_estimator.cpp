@@ -151,9 +151,15 @@ void BaseLinkEstimator::AddSample(const std::string &body, double t,
     }
 }
 
-bool BaseLinkEstimator::compute(std::string &report)
+
+bool BaseLinkEstimator::computeLock(std::string &report)
 {
     std::lock_guard<std::mutex> lk(mtx_);
+    return compute(report);
+}
+
+bool BaseLinkEstimator::compute(std::string &report)
+{
     const int n = (int)icr_x_.size();
     if (n < min_samples_)
     {
@@ -233,7 +239,7 @@ bool BaseLinkEstimator::compute(std::string &report)
 bool BaseLinkEstimator::computeSrv(std_srvs::Trigger::Request &,
                                    std_srvs::Trigger::Response &res)
 {
-    res.success = compute(res.message);
+    res.success = computeLock(res.message);
     return true;
 }
 

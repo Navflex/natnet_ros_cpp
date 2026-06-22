@@ -44,6 +44,7 @@ private:
     bool computeSrv(std_srvs::Trigger::Request &req,
                     std_srvs::Trigger::Response &res);
     bool compute(std::string &report);
+    bool computeLock(std::string &report);
     static double yawFromQuat(double qx, double qy, double qz, double qw);
 
     // --- config ---
