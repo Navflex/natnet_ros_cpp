@@ -62,13 +62,31 @@ void BaseLinkEstimator::SetBodyMarker(const std::string &body, int marker_idx,
 {
     if (!enabled_ || body != target_body_)
         return;
+
+    // Rotate frames from y up to z up
+    // TODO Base this on a param
+    if (true) {
+        double mx_old = mx;
+        double my_old = my;
+        double mz_old = mz;
+
+        mx = mx_old;
+        my = -mz_old;
+        mz = my_old; 
+    }
+
+    // Publish markers for debugging
+    // TODO filter on debug
     static int cur = 0;
     if (marker_idx == cur) {
 	    printf("Marker %d: %f %f %f\n", marker_idx, mx, my, mz);
 	    cur ++;
     }
-    if (marker_idx == marker_a_) { ma_x_ = mx; ma_y_ = -mz; ma_z_ = my; have_marker_a_ = true; }
-    if (marker_idx == marker_b_) { mb_x_ = mx; mb_y_ = -mz; mb_z_ = my; have_marker_b_ = true; }
+
+    // TODO publish marker a and b positions for debugging
+
+    if (marker_idx == marker_a_) { ma_x_ = mx; ma_y_ = my; ma_z_ = mz; have_marker_a_ = true; }
+    if (marker_idx == marker_b_) { mb_x_ = mx; mb_y_ = my; mb_z_ = mz; have_marker_b_ = true; }
 }
 
 void BaseLinkEstimator::AddSample(const std::string &body, double t,
@@ -213,10 +231,8 @@ bool BaseLinkEstimator::compute(std::string &report)
     off_y_ = my + tproj * ay;
 
     // Z height of base link as average of a and b
-    // off_z_ = ((ma_z_ + mb_z_)/2) - rigid_body_z;
     off_z_ = ((ma_z_ + mb_z_)/2);
-
-
+    
     // Set orientation assuming marker A is on the left
     double lx = ma_x_ - mb_x_;
     double ly = ma_y_ - mb_y_;
