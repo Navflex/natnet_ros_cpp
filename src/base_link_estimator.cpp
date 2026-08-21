@@ -62,8 +62,13 @@ void BaseLinkEstimator::SetBodyMarker(const std::string &body, int marker_idx,
 {
     if (!enabled_ || body != target_body_)
         return;
-    if (marker_idx == marker_a_) { ma_x_ = mx; ma_y_ = my; ma_z_ = mz; have_marker_a_ = true; }
-    if (marker_idx == marker_b_) { mb_x_ = mx; mb_y_ = my; mb_z_ = mz; have_marker_b_ = true; }
+    static int cur = 0;
+    if (marker_idx == cur) {
+	    printf("Marker %d: %f %f %f\n", marker_idx, mx, my, mz);
+	    cur ++;
+    }
+    if (marker_idx == marker_a_) { ma_x_ = mx; ma_y_ = -mz; ma_z_ = my; have_marker_a_ = true; }
+    if (marker_idx == marker_b_) { mb_x_ = mx; mb_y_ = -mz; mb_z_ = my; have_marker_b_ = true; }
 }
 
 void BaseLinkEstimator::AddSample(const std::string &body, double t,
@@ -174,6 +179,9 @@ bool BaseLinkEstimator::compute(std::string &report)
         return false;
     }
 
+    printf("Marker A: %f %f %f\n", ma_x_, ma_y_, ma_z_);
+    printf("Marker B: %f %f %f\n", mb_x_, mb_y_, mb_z_);
+
     // --- weighted PCA line fit of the ICR cloud (axle line) ---
     double W = 0, mx = 0, my = 0;
     for (int i = 0; i < n; ++i) { W += icr_w_[i]; mx += icr_w_[i] * icr_x_[i]; my += icr_w_[i] * icr_y_[i]; }
@@ -205,7 +213,8 @@ bool BaseLinkEstimator::compute(std::string &report)
     off_y_ = my + tproj * ay;
 
     // Z height of base link as average of a and b
-    off_z_ = ((ma_z_ + mb_z_)/2) - rigid_body_z;
+    // off_z_ = ((ma_z_ + mb_z_)/2) - rigid_body_z;
+    off_z_ = ((ma_z_ + mb_z_)/2);
 
 
     // Set orientation assuming marker A is on the left
