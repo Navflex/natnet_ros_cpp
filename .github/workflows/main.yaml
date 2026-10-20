@@ -2,8 +2,7 @@ name: main
 
 on:
   pull_request:
-    branches:
-      - main
+    # every pull request runs CI, whatever its base (Navflex/.github#389)
   push:
     branches:
       - main
